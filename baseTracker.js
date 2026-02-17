@@ -31,7 +31,9 @@ export class BaseTracker {
     const targetRect = target ? target.getBoundingClientRect() : null
 
     const positions = {
-      cursor: () => this.positionAtCursor(targetRect),
+      textCursor: () => this.positionAtTextCursor(targetRect),
+      cursor: () => this.positionAtTextCursor(targetRect), // backward compatibility
+      mouse: () => this.positionAtMouse(targetRect),
       above: () => this.positionAbove(targetRect),
       bottom: () => this.positionBelow(targetRect),
       topRight: () => {
@@ -58,8 +60,18 @@ export class BaseTracker {
     }
   }
 
-  // Override in subclasses for custom cursor positioning
-  positionAtCursor(targetRect) {
+  // Override in subclasses for custom positioning
+  positionAtTextCursor(targetRect) {
+    if (targetRect) {
+      this.popup.style.left = `${targetRect.left}px`
+      this.popup.style.top = `${targetRect.top - 40}px`
+    } else {
+      this.popup.style.right = "10px"
+      this.popup.style.top = "10px"
+    }
+  }
+
+  positionAtMouse(targetRect) {
     if (targetRect) {
       this.popup.style.left = `${targetRect.left}px`
       this.popup.style.top = `${targetRect.top - 40}px`
@@ -95,6 +107,11 @@ export class BaseTracker {
     return Math.round((charCount / 5) / timeElapsed)
   }
 
+  shouldUpdatePositionDynamically() {
+    const position = this.settingsManager.currentSettings.popupPosition
+    return position === "textCursor" || position === "cursor" || position === "mouse"
+  }
+
   updateWPM(target) {
     const now = performance.now()
 
@@ -109,6 +126,11 @@ export class BaseTracker {
     }
 
     this.charCount++
+
+    // Update position dynamically for cursor-following modes
+    if (this.shouldUpdatePositionDynamically()) {
+      this.updatePopupPosition(target)
+    }
 
     if (this.charCount >= this.MIN_CHARS_FOR_WPM) {
       const wpm = this.calculateWPM(this.charCount, this.startTime)

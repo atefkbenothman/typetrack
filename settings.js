@@ -4,7 +4,7 @@ export const DEFAULT_SETTINGS = {
   backgroundColor: "#FF0000",
   opacity: 80,
   textColor: "#ffffff",
-  popupPosition: "above",
+  popupPosition: "textCursor",
   extensionEnabled: true
 }
 
@@ -17,6 +17,10 @@ export class SettingsManager {
   async initializeSettings() {
     const loadedSettings = await chrome.storage.sync.get(DEFAULT_SETTINGS)
     this.settings = loadedSettings
+
+    // Migration: update old position values to new default
+    await this.migrateSettings()
+
     this.applySettings()
 
     // listen for settings changes
@@ -38,6 +42,23 @@ export class SettingsManager {
     })
 
     return this.settings
+  }
+
+  async migrateSettings() {
+    // Migration v1: Change old default positions to textCursor
+    const migrationKey = "migration_v1_textCursor"
+    const migrationStatus = await chrome.storage.sync.get(migrationKey)
+
+    if (!migrationStatus[migrationKey]) {
+      // Migrate old defaults (above, cursor) to textCursor
+      const oldDefaults = ["above", "cursor"]
+      if (oldDefaults.includes(this.settings.popupPosition)) {
+        this.settings.popupPosition = "textCursor"
+        await chrome.storage.sync.set({ popupPosition: "textCursor" })
+      }
+      // Mark migration as complete
+      await chrome.storage.sync.set({ [migrationKey]: true })
+    }
   }
 
   async ready() {

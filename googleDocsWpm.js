@@ -43,7 +43,7 @@ export class GoogleDocsTracker extends BaseTracker {
     this.updateWPM(cursor)
   }
 
-  positionAtCursor(targetRect) {
+  positionAtTextCursor(targetRect) {
     if (targetRect) {
       this.popup.style.left = `${targetRect.left + 10}px`
       this.popup.style.top = `${targetRect.top - 30}px`
@@ -51,6 +51,11 @@ export class GoogleDocsTracker extends BaseTracker {
       this.popup.style.right = "10px"
       this.popup.style.top = "60px"
     }
+  }
+
+  positionAtMouse(targetRect) {
+    // For Google Docs, mouse position isn't tracked, so fall back to text cursor
+    this.positionAtTextCursor(targetRect)
   }
 
   positionAbove(targetRect) {
