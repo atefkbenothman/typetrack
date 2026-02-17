@@ -3,104 +3,358 @@
 
 <head>
   <style>
-    body {
-      width: 300px;
-      font-family: monospace, Arial, sans-serif;
-      background-color: #1e2223;
-      color: white;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    .form-group {
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #18181b;
+      color: #fafafa;
+      padding: 16px;
+    }
+
+    /* Header */
+    .header {
       margin-bottom: 16px;
     }
 
-    label {
-      display: block;
+    .header h1 {
+      font-size: 16px;
+      font-weight: 600;
       margin-bottom: 4px;
-      font-weight: bold;
+      letter-spacing: -0.01em;
     }
 
-    .title {
-      font-size: 18px;
+    .header p {
+      font-size: 11px;
+      color: #a1a1aa;
+      line-height: 1.4;
     }
 
-    .description {
-      margin-top: -10px;
+    /* Sections */
+    .section {
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-label {
       font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #a1a1aa;
+      margin-bottom: 12px;
     }
 
-    .heading {
-      margin-bottom: 20px;
+    /* Preview */
+    .preview-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60px;
+      background: #18181b;
+      border-radius: 6px;
+      padding: 16px;
     }
 
-    input[type="number"] {
-      width: 100%;
-      box-sizing: border-box;
-      -webkit-box-sizing: border-box;
-      -moz-box-sizing: border-box;
+    .preview-widget {
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: 500;
+      white-space: nowrap;
     }
 
-    button {
-      width: 100%;
-      padding: 8px;
-      background: #4CAF50;
-      color: white;
+    /* Form groups */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #fafafa;
+    }
+
+    /* Color inputs */
+    .color-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    input[type="color"] {
+      width: 32px;
+      height: 32px;
+      border: 1px solid #3f3f46;
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    input[type="color"]::-webkit-color-swatch {
       border: none;
       border-radius: 4px;
-      cursor: pointer;
-      font-family: monospace, Arial, sans-serif;
     }
 
-    button:hover {
-      background: #45a049;
+    .color-value {
+      font-size: 12px;
+      color: #a1a1aa;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+      text-transform: uppercase;
     }
+
+    /* Range sliders */
+    .range-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #3f3f46;
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #22c55e;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    .range-value {
+      min-width: 48px;
+      text-align: right;
+      font-size: 12px;
+      color: #a1a1aa;
+      font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+    }
+
+    /* Select dropdown */
+    select {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 13px;
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      border-radius: 6px;
+      color: #fafafa;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    select:hover {
+      border-color: #52525b;
+    }
+
+    select:focus {
+      border-color: #22c55e;
+    }
+
+    /* Toggle switch */
+    .toggle-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-label {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #3f3f46;
+      transition: 0.2s ease;
+      border-radius: 22px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #fafafa;
+      transition: 0.2s ease;
+      border-radius: 50%;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background-color: #22c55e;
+    }
+
+    .toggle input:checked + .toggle-slider:before {
+      transform: translateX(18px);
+    }
+
+    /* Save button */
+    .save-btn {
+      width: 100%;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      background: #22c55e;
+      color: #052e16;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .save-btn:hover {
+      background: #16a34a;
+    }
+
+    .save-btn:active {
+      background: #15803d;
+    }
+
   </style>
 </head>
 
 <body>
-  <div class="heading">
-    <p class="title">TypeTrack</p>
-    <p class="description">Display your typing speed (wpm) in real-time on any textbox</p>
+  <div class="header">
+    <h1>TypeTrack</h1>
+    <p>Display your typing speed in real-time</p>
   </div>
+
   <form id="settingsForm">
-    <div class="form-group">
-      <label for="extensionEnabled">Enable Extension:</label>
-      <input type="checkbox" id="extensionEnabled" />
+    <!-- Preview Section -->
+    <div class="section">
+      <div class="section-label">Preview</div>
+      <div class="preview-container">
+        <div class="preview-widget" id="previewWidget">72 wpm</div>
+      </div>
     </div>
-    <div class="form-group">
-      <label for="timeout">Hide Delay (milliseconds):</label>
-      <input type="number" id="timeout" min="500" max="10000000" step="100">
+
+    <!-- Appearance Section -->
+    <div class="section">
+      <div class="section-label">Appearance</div>
+
+      <div class="form-group">
+        <label>Background Color</label>
+        <div class="color-input-wrapper">
+          <input type="color" id="backgroundColor">
+          <span class="color-value" id="bgColorValue">#000000</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Text Color</label>
+        <div class="color-input-wrapper">
+          <input type="color" id="textColor">
+          <span class="color-value" id="textColorValue">#ffffff</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Font Size</label>
+        <div class="range-wrapper">
+          <input type="range" id="fontSize" min="8" max="32" value="14" step="1">
+          <span class="range-value" id="fontSizeValue">14px</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Opacity</label>
+        <div class="range-wrapper">
+          <input type="range" id="opacity" min="0" max="100" value="80" step="5">
+          <span class="range-value" id="opacityValue">80%</span>
+        </div>
+      </div>
     </div>
-    <div class="form-group">
-      <label for="fontSize">Font Size (pixels):</label>
-      <input type="number" id="fontSize" min="2" max="100" step="1">
+
+    <!-- Behavior Section -->
+    <div class="section">
+      <div class="section-label">Behavior</div>
+
+      <div class="form-group">
+        <div class="toggle-wrapper">
+          <span class="toggle-label">Enable Extension</span>
+          <label class="toggle">
+            <input type="checkbox" id="extensionEnabled">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Hide Delay</label>
+        <div class="range-wrapper">
+          <input type="range" id="timeout" min="500" max="5000" value="2000" step="100">
+          <span class="range-value" id="timeoutValue">2000ms</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Position</label>
+        <select id="position">
+          <option value="cursor">Follow Cursor</option>
+          <option value="above">Above Text</option>
+          <option value="bottom">Below Text</option>
+          <option value="topRight">Top Right</option>
+          <option value="topLeft">Top Left</option>
+          <option value="bottomRight">Bottom Right</option>
+          <option value="bottomLeft">Bottom Left</option>
+        </select>
+      </div>
     </div>
-    <div class="form-group">
-      <label for="backgroundColor">Background Color:</label>
-      <input type="color" id="backgroundColor">
-    </div>
-    <div class="form-group">
-      <label for="textColor">Text Color:</label>
-      <input type="color" id="textColor">
-    </div>
-    <div class="form-group">
-      <label for="position">Popup Position:</label>
-      <select id="position">
-        <option value="cursor">Cursor</option>
-        <option value="above">Above Text</option>
-        <option value="bottom">Below Text</option>
-        <option value="topRight">Top Right</option>
-        <option value="topLeft">Top Left</option>
-        <option value="bottomRight">Bottom Right</option>
-        <option value="bottomLeft">Bottom Left</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="opacity">Background Opacity (%):</label>
-      <input type="range" id="opacity" min="0" max="100" value="80" step="10">
-    </div>
-    <button type="submit">Save Settings</button>
+
+    <button type="submit" class="save-btn">Save Settings</button>
   </form>
+
   <script type="module" src="popup.js"></script>
 </body>
 

@@ -3,18 +3,21 @@ const settingsUrl = chrome.runtime.getURL("settings.js")
 class PopupManager {
   constructor(defaultSettings) {
     this.form = document.getElementById("settingsForm")
-    this.statusElement = document.getElementById("status")
+    this.previewWidget = document.getElementById("previewWidget")
     this.initialize(defaultSettings)
   }
 
   initialize(defaultSettings) {
     this.loadSettings(defaultSettings)
     this.form.addEventListener("submit", this.handleSubmit.bind(this))
+    this.attachPreviewListeners()
   }
 
   async loadSettings(defaultSettings) {
     const settings = await chrome.storage.sync.get(defaultSettings)
     this.populateForm(settings)
+    this.updatePreview()
+    this.updateDisplayValues()
   }
 
   populateForm(settings) {
@@ -32,6 +35,55 @@ class PopupManager {
         elements[key](value)
       }
     })
+  }
+
+  attachPreviewListeners() {
+    const previewInputs = ["backgroundColor", "textColor", "fontSize", "opacity"]
+    previewInputs.forEach(id => {
+      const element = document.getElementById(id)
+      element.addEventListener("input", () => {
+        this.updatePreview()
+        this.updateDisplayValues()
+      })
+    })
+
+    // Update display values for timeout slider
+    document.getElementById("timeout").addEventListener("input", () => {
+      this.updateDisplayValues()
+    })
+  }
+
+  updatePreview() {
+    const bgColor = document.getElementById("backgroundColor").value
+    const textColor = document.getElementById("textColor").value
+    const fontSize = document.getElementById("fontSize").value
+    const opacity = document.getElementById("opacity").value
+
+    // Convert hex to rgba for opacity
+    const r = parseInt(bgColor.slice(1, 3), 16)
+    const g = parseInt(bgColor.slice(3, 5), 16)
+    const b = parseInt(bgColor.slice(5, 7), 16)
+    const rgbaBackground = `rgba(${r}, ${g}, ${b}, ${opacity / 100})`
+
+    this.previewWidget.style.backgroundColor = rgbaBackground
+    this.previewWidget.style.color = textColor
+    this.previewWidget.style.fontSize = `${fontSize}px`
+  }
+
+  updateDisplayValues() {
+    // Color values
+    document.getElementById("bgColorValue").textContent =
+      document.getElementById("backgroundColor").value.toUpperCase()
+    document.getElementById("textColorValue").textContent =
+      document.getElementById("textColor").value.toUpperCase()
+
+    // Slider values
+    document.getElementById("fontSizeValue").textContent =
+      `${document.getElementById("fontSize").value}px`
+    document.getElementById("opacityValue").textContent =
+      `${document.getElementById("opacity").value}%`
+    document.getElementById("timeoutValue").textContent =
+      `${document.getElementById("timeout").value}ms`
   }
 
   getFormValues() {
@@ -57,19 +109,11 @@ class PopupManager {
   }
 
   showStatus(duration = 2000) {
-    const statusElement = document.createElement("div")
-    statusElement.id = "status"
-    statusElement.className = "status"
-    statusElement.textContent = "Settings saved!"
-    statusElement.style.marginTop = "8px"
-    statusElement.style.padding = "8px"
-    statusElement.style.background = "#dff0d8"
-    statusElement.style.color = "#3c763d"
-    statusElement.style.borderRadius = "4px"
-    statusElement.style.textAlign = "center"
-    document.body.appendChild(statusElement)
+    const button = this.form.querySelector(".save-btn")
+    const originalText = button.textContent
+    button.textContent = "Settings saved!"
     setTimeout(() => {
-      statusElement.remove()
+      button.textContent = originalText
     }, duration)
   }
 
