@@ -39,6 +39,7 @@
       "resources": [
         "settings.js",
         "wpm.js",
+        "googleDocsWpm.js",
         "popup.js"
       ],
       "matches": [
