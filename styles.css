@@ -4,6 +4,7 @@
   border-radius: 4px;
   pointer-events: none;
   visibility: hidden;
+  opacity: 0;
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   line-height: 1;
   white-space: nowrap;
@@ -12,4 +13,12 @@
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transform: scale(0.95);
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0.15s ease-out;
+}
+
+.wpm-widget.visible {
+  visibility: visible;
+  opacity: 1;
+  transform: scale(1);
 }

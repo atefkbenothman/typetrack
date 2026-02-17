@@ -1,4 +1,5 @@
 const settingsURL = chrome.runtime.getURL("settings.js")
+const baseTrackerURL = chrome.runtime.getURL("baseTracker.js")
 const wpmURL = chrome.runtime.getURL("wpm.js")
 const googleDocsWpmURL = chrome.runtime.getURL("googleDocsWpm.js")
 
@@ -7,25 +8,34 @@ function isGoogleDocs() {
          window.location.pathname.startsWith('/document/');
 }
 
-// use promise.all to load both modules
-Promise.all([
-  import(settingsURL),
-  isGoogleDocs() ? import(googleDocsWpmURL) : import(wpmURL)
-]).then(([settingsModule, trackerModule]) => {
-  const { SettingsManager } = settingsModule
-  const TrackerClass = isGoogleDocs() ? trackerModule.GoogleDocsTracker : trackerModule.WPM
+async function initialize() {
+  try {
+    // Load base tracker first (required by both trackers)
+    await import(baseTrackerURL)
 
-  // initialize wpm widget
-  const widget = document.createElement("div")
-  widget.className = "wpm-widget"
-  document.body.appendChild(widget)
+    // Load settings and appropriate tracker
+    const [settingsModule, trackerModule] = await Promise.all([
+      import(settingsURL),
+      isGoogleDocs() ? import(googleDocsWpmURL) : import(wpmURL)
+    ])
 
-  // initialize settings
-  const settings = new SettingsManager();
+    const { SettingsManager } = settingsModule
+    const TrackerClass = isGoogleDocs() ? trackerModule.GoogleDocsTracker : trackerModule.WPM
 
-  // initialize tracker
-  const tracker = new TrackerClass(widget, settings)
+    // Initialize wpm widget
+    const widget = document.createElement("div")
+    widget.className = "wpm-widget"
+    document.body.appendChild(widget)
 
-}).catch(error => {
-  console.error('Error loading modules:', error)
-});
+    // Initialize settings and wait for them to load
+    const settings = new SettingsManager()
+    await settings.ready()
+
+    // Initialize tracker after settings are ready
+    const tracker = new TrackerClass(widget, settings)
+  } catch (error) {
+    console.error('TypeTrack: Error loading modules:', error)
+  }
+}
+
+initialize()

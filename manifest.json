@@ -38,6 +38,7 @@
     {
       "resources": [
         "settings.js",
+        "baseTracker.js",
         "wpm.js",
         "googleDocsWpm.js",
         "popup.js"

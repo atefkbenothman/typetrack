@@ -1,12 +1,11 @@
-export class GoogleDocsTracker {
+import { BaseTracker } from './baseTracker.js'
+
+export class GoogleDocsTracker extends BaseTracker {
   constructor(popup, settingsManager) {
-    this.popup = popup
-    this.settingsManager = settingsManager
-    this.startTime = null
-    this.hideTimeout = null
-    this.charCount = 0
-    this.MIN_CHARS_FOR_WPM = 1
-    this.isTracking = false
+    super(popup, settingsManager)
+    this.pollAttempts = 0
+    this.maxPollAttempts = 20
+    this.iframeDoc = null
     this.waitForEditor()
   }
 
@@ -15,122 +14,62 @@ export class GoogleDocsTracker {
     if (iframe && iframe.contentDocument) {
       this.initializeEventListeners(iframe.contentDocument)
     } else {
-      setTimeout(() => this.waitForEditor(), 500)
+      this.pollAttempts++
+      if (this.pollAttempts < this.maxPollAttempts) {
+        setTimeout(() => this.waitForEditor(), 500)
+      } else {
+        console.warn('TypeTrack: Could not find Google Docs editor after 10 seconds')
+      }
     }
   }
 
   initializeEventListeners(iframeDoc) {
+    // Store reference to prevent duplicate listeners
+    if (this.iframeDoc === iframeDoc) return
+    this.iframeDoc = iframeDoc
+
     // Listen on the iframe's document for keypress events
     iframeDoc.addEventListener('keypress', (e) => this.handleKeyPress(e), { passive: true })
-
-    // Also listen on main document as fallback
-    document.addEventListener('keypress', (e) => this.handleKeyPress(e), { passive: true })
   }
 
   handleKeyPress(e) {
     if (!this.settingsManager.currentSettings.extensionEnabled) return
-    // Only count printable characters (length 1)
     if (e.key.length !== 1) return
-    this.updateWPM()
+    this.updateWPMWithCursor()
   }
 
-  updatePopupPosition() {
-    const settings = this.settingsManager.currentSettings
-
-    this.popup.style.position = "fixed"
-    this.popup.style.width = "fit-content"
-    this.popup.style.height = "fit-content"
-    this.popup.style.left = ""
-    this.popup.style.right = ""
-    this.popup.style.top = ""
-    this.popup.style.bottom = ""
-
+  updateWPMWithCursor() {
     const cursor = document.querySelector('.kix-cursor-caret')
+    this.updateWPM(cursor)
+  }
 
-    const positions = {
-      cursor: () => {
-        if (cursor) {
-          const rect = cursor.getBoundingClientRect()
-          this.popup.style.left = `${rect.left + 10}px`
-          this.popup.style.top = `${rect.top - 30}px`
-        } else {
-          this.popup.style.right = "10px"
-          this.popup.style.top = "60px"
-        }
-      },
-      above: () => {
-        if (cursor) {
-          const rect = cursor.getBoundingClientRect()
-          this.popup.style.left = `${rect.left}px`
-          this.popup.style.top = `${rect.top - 40}px`
-        } else {
-          this.popup.style.right = "10px"
-          this.popup.style.top = "60px"
-        }
-      },
-      bottom: () => {
-        if (cursor) {
-          const rect = cursor.getBoundingClientRect()
-          this.popup.style.left = `${rect.left}px`
-          this.popup.style.top = `${rect.bottom + 20}px`
-        } else {
-          this.popup.style.right = "10px"
-          this.popup.style.bottom = "10px"
-        }
-      },
-      topRight: () => {
-        this.popup.style.right = "10px"
-        this.popup.style.top = "60px"
-      },
-      topLeft: () => {
-        this.popup.style.left = "10px"
-        this.popup.style.top = "60px"
-      },
-      bottomRight: () => {
-        this.popup.style.right = "10px"
-        this.popup.style.bottom = "10px"
-      },
-      bottomLeft: () => {
-        this.popup.style.left = "10px"
-        this.popup.style.bottom = "10px"
-      },
-    }
-
-    const positionFunc = positions[settings.popupPosition]
-    if (positionFunc) {
-      positionFunc()
+  positionAtCursor(targetRect) {
+    if (targetRect) {
+      this.popup.style.left = `${targetRect.left + 10}px`
+      this.popup.style.top = `${targetRect.top - 30}px`
+    } else {
+      this.popup.style.right = "10px"
+      this.popup.style.top = "60px"
     }
   }
 
-  updateWPM() {
-    const now = performance.now()
-
-    if (!this.startTime) {
-      this.startTime = now
-      this.charCount = 0
-      this.updatePopupPosition()
-      this.popup.style.visibility = "hidden"
-      this.popup.textContent = "- wpm"
-      this.isTracking = true
-      return
+  positionAbove(targetRect) {
+    if (targetRect) {
+      this.popup.style.left = `${targetRect.left}px`
+      this.popup.style.top = `${targetRect.top - 40}px`
+    } else {
+      this.popup.style.right = "10px"
+      this.popup.style.top = "60px"
     }
+  }
 
-    this.charCount++
-
-    if (this.charCount >= this.MIN_CHARS_FOR_WPM) {
-      const timeElapsed = (now - this.startTime) / 1000 / 60
-      const wpm = Math.round((this.charCount / 5) / timeElapsed)
-      this.popup.style.visibility = "visible"
-      this.popup.textContent = `${wpm} wpm`
-      this.updatePopupPosition()
+  positionBelow(targetRect) {
+    if (targetRect) {
+      this.popup.style.left = `${targetRect.left}px`
+      this.popup.style.top = `${targetRect.bottom + 20}px`
+    } else {
+      this.popup.style.right = "10px"
+      this.popup.style.bottom = "10px"
     }
-
-    clearTimeout(this.hideTimeout)
-    this.hideTimeout = setTimeout(() => {
-      this.popup.style.visibility = "hidden"
-      this.startTime = null
-      this.charCount = 0
-      this.isTracking = false
-    }, this.settingsManager.currentSettings.timeout)
   }
 }

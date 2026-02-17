@@ -11,7 +11,7 @@ export const DEFAULT_SETTINGS = {
 export class SettingsManager {
   constructor() {
     this.settings = { ...DEFAULT_SETTINGS }
-    this.initializeSettings()
+    this.readyPromise = this.initializeSettings()
   }
 
   async initializeSettings() {
@@ -36,6 +36,12 @@ export class SettingsManager {
         }
       }
     })
+
+    return this.settings
+  }
+
+  async ready() {
+    return this.readyPromise
   }
 
   applySettings() {
